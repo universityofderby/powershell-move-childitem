@@ -23,7 +23,11 @@ None
 
 .EXAMPLE
 PS> Get-ChildItem -Path '\\server\share' -Directory | Move-ChildItem
-For each subdirectory of '\\server\share', move child items of the subdirectory to '.\Documents'.
+For each subdirectory of '\\server\share', move child items to '.\Documents'.
+
+.EXAMPLE
+PS> Get-ChildItem -Path '\\server\share' -Directory | Move-ChildItem -WhatIf
+For each subdirectory of '\\server\share', list operations if child items were moved to '.\Documents'.
 
 .EXAMPLE
 PS> Move-ChildItem -Path (Get-Item 'C:\Dir1')
@@ -66,7 +70,7 @@ Move child items of 'C:\Dir1' to 'C:\Dir1\Documents' with specific log file loca
     [Parameter(Mandatory = $true, ValueFromPipeline = $true)] [System.IO.DirectoryInfo[]]$Path,   
     [Parameter()] [String]$ChildPath = 'Documents',
     [Parameter()] [String[]]$Exclude = @('.*','Desktop','Documents','Downloads','Favorites','Music','Pictures','Videos'),
-    [Parameter()] [String]$LogPath = "$(Get-Location)\Move-ChildItem_$(Get-Date -Format 'yyyy-MM-dd').log"
+    [Parameter()] [String]$LogPath = (Join-Path -Path (Get-Location) -ChildPath "Move-ChildItem_$(Get-Date -Format 'yyyy-MM-dd').log")
   )
   
   Begin {
@@ -83,7 +87,7 @@ Move child items of 'C:\Dir1' to 'C:\Dir1\Documents' with specific log file loca
       Exit
     }
     Write-Log -Level 'INFO' -Message '*** Started execution ***'
-    Write-Log -Level 'INFO' -Message "The following child items will not be moved: $($Exclude -join ', ')"
+    Write-Log -Level 'INFO' -Message "Excluded child items: $($Exclude -join ', ')"
   }
         
   Process {
