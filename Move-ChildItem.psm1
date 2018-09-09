@@ -18,6 +18,12 @@ Child items to exclude from being moved.
 .PARAMETER LogPath
 Log file path.
 
+.PARAMETER LogToConsole
+Enable/disable logging to console.
+
+.PARAMETER LogToFile
+Enable/disable logging to file.
+
 .OUTPUTS
 None
 
@@ -53,7 +59,14 @@ Move child items of 'C:\Dir1' to 'C:\Dir1\Documents' with confirmation.
 PS> Move-ChildItem -Path (Get-Item 'C:\Dir1') -LogPath 'C:\Temp\Move-ChildItem.log'
 Move child items of 'C:\Dir1' to 'C:\Dir1\Documents' with specific log file location.
 
+.EXAMPLE
+PS> Move-ChildItem -Path (Get-Item 'C:\Dir1') -LogToConsole $true
+Move child items of 'C:\Dir1' to 'C:\Dir1\Documents' with logging to console enabled.
+
 .NOTES
+  Version: 0.2.0 - Add parameters to enable/disable logging to console/file
+  Date: 2018-09-08
+
   Version: 0.1.0 - Initial version
   Date: 2018-09-07
   
@@ -70,24 +83,33 @@ Move child items of 'C:\Dir1' to 'C:\Dir1\Documents' with specific log file loca
     [Parameter(Mandatory = $true, ValueFromPipeline = $true)] [System.IO.DirectoryInfo[]]$Path,   
     [Parameter()] [String]$ChildPath = 'Documents',
     [Parameter()] [String[]]$Exclude = @('.*','Desktop','Documents','Downloads','Favorites','Music','Pictures','Videos'),
-    [Parameter()] [String]$LogPath = (Join-Path -Path (Get-Location) -ChildPath "Move-ChildItem_$(Get-Date -Format 'yyyy-MM-dd').log")
+    [Parameter()] [String]$LogPath = (Join-Path -Path (Get-Location) -ChildPath "Move-ChildItem_$(Get-Date -Format 'yyyy-MM-dd').log"),
+    [Parameter()] [String]$LogToConsole = $false,
+    [Parameter()] [String]$LogToFile = $true
   )
   
   Begin {
     Try {
       # Install Logging module
       Install-Module -Name Logging -Force
-      # Add logging targets for console and file
+      # Set default logging level
       Set-LoggingDefaultLevel -Level 'INFO'
-      Add-LoggingTarget -Name Console
-      Add-LoggingTarget -Name File -Configuration @{Path = $LogPath}
+      # Enable/disable logging to console
+      If ($LogToConsole) {
+        Add-LoggingTarget -Name Console
+      }
+      # Enable/disable logging to file
+      If ($LogToFile) {
+        Add-LoggingTarget -Name File -Configuration @{Path = $LogPath}
+      }
+      # Start log
+      Write-Log -Level 'INFO' -Message '*** Started execution ***'
+      Write-Log -Level 'INFO' -Message "Excluded child items: $($Exclude -join ', ')"
     }
     Catch {
       Write-Warning "Exception while configuring logging: $($_.Exception.Message)"
       Exit
     }
-    Write-Log -Level 'INFO' -Message '*** Started execution ***'
-    Write-Log -Level 'INFO' -Message "Excluded child items: $($Exclude -join ', ')"
   }
         
   Process {
@@ -137,7 +159,9 @@ Move child items of 'C:\Dir1' to 'C:\Dir1\Documents' with specific log file loca
   }
 
   End {
+    # Finish log
     Write-Log -Level 'INFO' -Message '*** Finished execution ***'
+    # Wait for logging to complete
     Wait-Logging
   }
 }
