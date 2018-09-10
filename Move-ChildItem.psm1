@@ -18,6 +18,9 @@ Child items to exclude from being moved.
 .PARAMETER LogPath
 Log file path.
 
+.PARAMETER LogToConsole
+Enable/disable logging to console.
+
 .PARAMETER LogToFile
 Enable/disable logging to file.
 
@@ -61,7 +64,7 @@ PS> Move-ChildItem -Path (Get-Item 'C:\Dir1') -LogToFile $false
 Move child items of 'C:\Dir1' to 'C:\Dir1\Documents' with logging to file disabled.
 
 .NOTES
-  Version: 0.2.0 - Add parameters to enable/disable logging to file
+  Version: 0.2.0 - Add parameters to enable/disable logging to console/file
   Date: 2018-09-10
 
   Version: 0.1.0 - Initial version
@@ -81,7 +84,8 @@ Move child items of 'C:\Dir1' to 'C:\Dir1\Documents' with logging to file disabl
     [Parameter()] [String]$ChildPath = 'Documents',
     [Parameter()] [String[]]$Exclude = @('.*','Desktop','Documents','Downloads','Favorites','Music','Pictures','Videos'),
     [Parameter()] [String]$LogPath = (Join-Path -Path (Get-Location) -ChildPath "Move-ChildItem_$(Get-Date -Format 'yyyy-MM-dd').log"),
-    [Parameter()] [String]$LogToFile = $true
+    [Parameter()] [Boolean]$LogToConsole = $true,
+    [Parameter()] [Boolean]$LogToFile = $true
   )
   
   Begin {
@@ -90,6 +94,10 @@ Move child items of 'C:\Dir1' to 'C:\Dir1\Documents' with logging to file disabl
       Install-Module -Name Logging -Force
       # Set default logging level
       Set-LoggingDefaultLevel -Level 'INFO'
+      # Enable/disable logging to console
+      If ($LogToConsole) {
+        Add-LoggingTarget -Name Console
+      }
       # Enable/disable logging to file
       If ($LogToFile) {
         Add-LoggingTarget -Name File -Configuration @{Path = $LogPath}
