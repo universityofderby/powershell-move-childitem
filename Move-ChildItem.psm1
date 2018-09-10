@@ -75,7 +75,7 @@ Move child items of 'C:\Dir1' to 'C:\Dir1\Documents' with logging to console ena
   Dependencies: Logging module (https://www.powershellgallery.com/packages/Logging/2.4.11)
 #>
 
-  # Support -WhatIf for cmdlet
+  # Support -WhatIf and -Confirm for cmdlet
   [CmdletBinding(SupportsShouldProcess=$true)]
 
   # Cmdlet parameters
