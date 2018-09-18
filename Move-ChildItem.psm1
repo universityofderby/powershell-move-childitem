@@ -129,11 +129,11 @@ Move child items of 'C:\Dir1' to 'C:\Dir1\Documents' with logging to file disabl
           If ($PSCmdlet.ShouldProcess("Destination: $destination", 'Create Directory')) {
             # Create new desintation directory if it doesn't exist
             Try {
-              New-Item -Path $destination -ItemType Directory
+              New-Item -Path $destination -ItemType Directory -ErrorAction Stop
               Write-Log -Level 'INFO' -Message "Created destination directory: $destination"
             }
             Catch {
-              Write-Log -Level 'ERROR' -Message $_.Exception.Message
+              Write-Log -Level 'ERROR' -Message "Failed to create destination directory: $destination. Exception: $($_.Exception.Message)"
             }
           }
         }
@@ -145,10 +145,10 @@ Move child items of 'C:\Dir1' to 'C:\Dir1\Documents' with logging to file disabl
           If ($PSCmdlet.ShouldProcess("Item: $_ Destination: $destination", 'Move Item')) {
             # Try moving child item to destination directory
             Try {
-              $_ | Move-Item -Destination $destination
+              $_ | Move-Item -Destination $destination -ErrorAction Stop
             }
             Catch {
-              Write-Log -Level 'ERROR' -Message $_.Exception.Message
+              Write-Log -Level 'ERROR' -Message "Failed to move item. Exception: $($_.Exception.Message)"
             }
           }
         }
